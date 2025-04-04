@@ -39,24 +39,43 @@ try {
 }
 
 # Define the scheduled task
+# Define the scheduled task
 $TaskName = "Run DesktopInfo"
-$Action = New-ScheduledTaskAction -Execute "$TargetFolder\DesktopInfo.exe"
+$TaskPath = "$TargetFolder\DesktopInfo.exe"
+
+Write-Log "Preparing to create scheduled task."
+Write-Log "Task Name: $TaskName"
+Write-Log "Executable Path: $TaskPath"
+
+$Action = New-ScheduledTaskAction -Execute $TaskPath
 $Trigger = New-ScheduledTaskTrigger -AtLogOn
 $Principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\Users" -LogonType Interactive -RunLevel Highest
 
-# Remove existing task if present
+# Check for existing task
 $ExistingTask = Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
 if ($ExistingTask) {
     Write-Log "Existing scheduled task '$TaskName' found. Removing it."
-    Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false
+    try {
+        Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction Stop
+        Write-Log "Scheduled task '$TaskName' successfully removed."
+    } catch {
+        Write-Log "Failed to remove existing scheduled task. Error: $($_.Exception.Message)"
+    }
 }
+
+# Log detailed info before creation
+Write-Log "Creating task with:"
+Write-Log "  Action: $($Action.Execute)"
+Write-Log "  Trigger: $($Trigger.TriggerType)"
+Write-Log "  Principal: $($Principal.UserId)"
 
 # Register the new task
 try {
-    Register-ScheduledTask -TaskName $TaskName -Action $Action -Trigger $Trigger -Principal $Principal
+    Register-ScheduledTask -TaskName $TaskName -Action $Action -Trigger $Trigger -Principal $Principal -ErrorAction Stop
     Write-Log "Scheduled task '$TaskName' successfully created."
 } catch {
-    Write-Log "Error creating scheduled task: $($_.Exception.Message)"
+    Write-Log "Failed to create scheduled task. Error: $($_.Exception.Message)"
 }
+
 
 Write-Log "DesktopInfo deployment script completed."
