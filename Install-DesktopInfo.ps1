@@ -39,19 +39,6 @@ try {
 }
 
 # Define the scheduled task
-# Define the scheduled task
-$TaskName = "Run DesktopInfo"
-$TaskPath = "$TargetFolder\DesktopInfo.exe"
-
-Write-Log "Preparing to create scheduled task."
-Write-Log "Task Name: $TaskName"
-Write-Log "Executable Path: $TaskPath"
-
-$Action = New-ScheduledTaskAction -Execute $TaskPath
-$Trigger = New-ScheduledTaskTrigger -AtLogOn
-$Principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\Users" -LogonType Interactive -RunLevel Highest
-
-# Define the scheduled task
 $TaskName = "Run DesktopInfo"
 $TaskPath = "$TargetFolder\DesktopInfo.exe"
 
