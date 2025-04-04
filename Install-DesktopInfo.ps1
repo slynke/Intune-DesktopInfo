@@ -51,6 +51,18 @@ $Action = New-ScheduledTaskAction -Execute $TaskPath
 $Trigger = New-ScheduledTaskTrigger -AtLogOn
 $Principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\Users" -LogonType Interactive -RunLevel Highest
 
+# Define the scheduled task
+$TaskName = "Run DesktopInfo"
+$TaskPath = "$TargetFolder\DesktopInfo.exe"
+
+Write-Log "Preparing to create scheduled task."
+Write-Log "Task Name: $TaskName"
+Write-Log "Executable Path: $TaskPath"
+
+$Action = New-ScheduledTaskAction -Execute $TaskPath
+$Trigger = New-ScheduledTaskTrigger -AtLogOn
+$Principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
+
 # Check for existing task
 $ExistingTask = Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
 if ($ExistingTask) {
@@ -67,7 +79,7 @@ if ($ExistingTask) {
 Write-Log "Creating task with:"
 Write-Log "  Action: $($Action.Execute)"
 Write-Log "  Trigger: $($Trigger.TriggerType)"
-Write-Log "  Principal: $($Principal.UserId)"
+Write-Log "  Principal: SYSTEM"
 
 # Register the new task
 try {
